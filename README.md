@@ -202,7 +202,7 @@ Note that you will not be autograded on inference, and this is purely for fun. P
 Now that we have our baseline matrix multiply, let's see how we can optimize it. Currently, our matrix multiply behaves as follows:
 
 <p align="center">
-  <img src="https://github.com/stanford-cs149/nanogpt/blob/main/assets/current_matmul.png" width=40% height=40%>
+  <img src="https://github.com/stanford-cs149/cs149gpt/blob/main/assets/current_matmul.png" width=40% height=40%>
 </p>
 
 Notice how poor the cache behavior of this operation is. For each element of C, we load in multiple cache lines from both A and B. However, something to keep in mind is that the size of these matrices are much bigger than our cache size. Therefore, by the time we want to process our next element of C, we will be reloading cache lines that have been evicted. But what if we reused these cache lines? The main reason that our code is inefficient is because we are processing a single element of C at a time, but what if we processed BLOCK elements at a time? In particular, what if we processed a cache line size of elements? 
@@ -210,7 +210,7 @@ Notice how poor the cache behavior of this operation is. For each element of C, 
 Your job is to further extend your matrix multiply so that it employs blocking as discussed in [lecture](https://gfxcourses.stanford.edu/cs149/fall23/lecture/perfopt2/slide_43). You will decompose the large matrices into smaller cache-sized submatrices. Your multiply will then process the smaller submatrices before evicting them from the cache. The behavior should look like the following:
 
 <p align="center">
-  <img src="https://github.com/stanford-cs149/nanogpt/blob/main/assets/blocked_matmul.png" width=40% height=40%>
+  <img src="https://github.com/stanford-cs149/cs149gpt/blob/main/assets/blocked_matmul.png" width=40% height=40%>
 </p>
 
 As a further example, let's say I have 3 NxN matrices and a cache line size of L. I would then break my 3 NxN matrices into (N/L)x(N/L) submatrices. How does this improve my cache utilization?
@@ -323,13 +323,13 @@ The attention formula is very awkward to fuse for a couple reasons. Notice how t
 Let's say that we have a BLOCKSIZE vector, we will denote it as $x \in \mathbb{R}^{B}$.The softmax of $x$ can be formulated as:
 
 <p align="center">
-  <img src="https://github.com/stanford-cs149/nanogpt/blob/main/assets/Softmax_decomp1.png" width=55% height=55%>
+  <img src="https://github.com/stanford-cs149/cs149gpt/blob/main/assets/Softmax_decomp1.png" width=55% height=55%>
 </p>
 
 It follows that if we have two BLOCKSIZE vectors, denoted as $x \in \mathbb{R}^{B}$ and $y \in \mathbb{R}^{B}$, then we can decompose $softmax([x\ y]$ as:
 
 <p align="center">
-  <img src="https://github.com/stanford-cs149/nanogpt/blob/main/assets/Softmax_decomp2.png" width=55% height=55%>
+  <img src="https://github.com/stanford-cs149/cs149gpt/blob/main/assets/Softmax_decomp2.png" width=55% height=55%>
 </p>
 
 
@@ -343,7 +343,7 @@ By doing this we can significantly decrease the memory footprint. Rather than ha
 The flash attention algorithm shown below, imports blocks of the matrices $Q$, $K$, and $V$ into smaller physical tiles. It then computes a local softmax in each tile, and then writes this result tile back to the full output matrix $O$. For $Q$, for example, each tile's size is (Br x d), and the tile size for $K$ is (Bc x d). Calculating $Br$ and $Bc$, as shown in the pseudocode below,  requires knowing the size $M$ of your SRAM/cache, which in this case is $M=131072$ floats. However, this number for $M$ is a suggestion - you are free to set $Br$ and $Bc$ to whatever values you find give you best performance. 
 
 <p align="center">
-  <img src="https://github.com/stanford-cs149/nanogpt/blob/main/assets/FlashAttentionPseudo.png" width=65% height=65%>
+  <img src="https://github.com/stanford-cs149/cs149gpt/blob/main/assets/FlashAttentionPseudo.png" width=65% height=65%>
 </p>
 
 ### Testing:
