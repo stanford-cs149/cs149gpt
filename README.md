@@ -138,10 +138,9 @@ Now that you have your accessors, it's time to start working on your custom atte
         you can reorder your `for` loops from traditional matrix multiplication.
    
         b) After you have achieved QK^t -- which should have shape (N, N) -- you should loop 
-        through each row. For each row, you should calculate the sum of the entire row. 
-        Next, you should get the exponential of each row element, which you can get using
-        the C++ inbuilt `exp` functon. Now, divide each of these resulting elements by the sum and 
-        then store it back into QK^t. 
+        through each row. For each row, you should get the exponential of each row element,
+        which you can get using the C++ inbuilt `exp` functon. Now, divide each of these 
+        resulting exponentials by the sum of all exponentials in its row and then store it back into QK^t. 
    
         c) Finally, you should matrix multiply QK^t with V and store the result into O. 
         Notice, much like Q and K, after you index the batch and head V and O will
