@@ -139,7 +139,7 @@ Now that you have your accessors, it's time to start working on your custom atte
    
         b) After you have achieved QK^t -- which should have shape (N, N) -- you should loop 
         through each row. For each row, you should get the exponential of each row element,
-        which you can get using the C++ inbuilt `exp` functon. Now, divide each of these 
+        which you can get using the C++ inbuilt `exp` function. Now, divide each of these 
         resulting exponentials by the sum of all exponentials in its row and then store it back into QK^t. 
    
         c) Finally, you should matrix multiply QK^t with V and store the result into O. 
