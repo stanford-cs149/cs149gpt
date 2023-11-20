@@ -185,7 +185,7 @@ If your attention is not producing the correct output, you will see the followin
     
 Note that you do not have to exactly match the reference `cpu time,` as long as you still produce a correct result. You should still be relatively close to the cpu time. We will provide you with a buffer of 15ms with respect to the reference cpu time. So, if you are <= 15ms behind the reference solution then that is fine and you will still get full credit. You are of course encouraged to beat the reference cpu time, and faster speeds will not be penalized.
 
-Note that the memory usage value will not change even if you allocate more intermediate variables then we give you. This memory usage is only profiled from the variables passed in as arguments. For each Part (1-4), we provide you with the minimum amount of variables to produce the correct result. We do this because we want you to see how the memory usage goes down as operations get fused and there will be writeup questions based on these memory values. Adding any more high memory data structures will most likely only hurt your performance, but you are welcome to try adding additional variables in your `module.cpp` file and you will not be penalized.
+Note that the memory usage value will not change even if you allocate more intermediate variables then we give you. This memory usage is only profiled from the variables passed in as arguments. For each Parts (1-4), we provide you with the minimum amount of variables to produce the correct result. **You can also assume that all the temporary intermediate tensors that we have passed in are initialized to contain zeros.** We do this because we want you to see how the memory usage goes down as operations get fused and there will be writeup questions based on these memory values. Adding any more high memory data structures will most likely only hurt your performance, but you are welcome to try adding additional variables in your `module.cpp` file and you will not be penalized.
 
 If you have implemented your attention layer, you can also see the DNN use your attention layer to generate text, optionally changing the model to `shakes256`, `shakes1024`, or `shakes2048` if you wish to output more text:
 
@@ -217,6 +217,8 @@ As a further example, let's say I have 3 NxN matrices and a cache line size of L
 However, something to keep in mind is that we do not have perfectly square matrices. Our $Q$ and $K^{T}$ matrices are Nxd and dxN respectively. Keep this in mind as you try to break your matrices into blocks. Furthermore, your tile size will not always divide up N evenly, meaning you will have some "remainder" tiles that are not full of data. In this case, you do not want to iterate over the entire "remainder" tile, but only iterate over a "subtile", which has dimension `min(tile_size, N-tileIndex*tileSize)`.
 
 Also, keep in mind that as before, the temporary memory you will need is already preallocated for you and passed to the function you need to implement (`myUnfusedAttentionBlocked`) - you shouldn't have to allocate anything yourself although you will not be penalized for doing so.
+
+**Note that you have two opportunities for blocked matrix multiplication here: QK^t and PV. You should utilize blocked matrix multiply on both in order to achieve the reference speedup.**
 
 ### Testing:
 Run the following test to check your program's correctness:
