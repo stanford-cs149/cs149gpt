@@ -112,7 +112,7 @@ torch::Tensor myNaiveAttention(torch::Tensor QTensor, torch::Tensor KTensor, tor
     /* Here is an example of how to read/write 0's to  QK_t (N, N) using the 2D accessors
 
            for (int i = 0; i < N; i++) {
-	       for (int j = 0; j < N; i++) {
+	       for (int j = 0; j < N; j++) {
 	           float val = twoDimRead(QK_t, i, j, N);
 	           twoDimWrite(QK_t, i, j, N, 0.0);
              }
