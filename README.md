@@ -51,6 +51,11 @@ After this is complete, you'll see some text that begins something like this:
 
 Sure, NanoGPT's output may not be literary excellence, but it is still pretty neat! What you see on screen is the output of the standard PyTorch implementation of NanoGPT. Feel free to change to larger sequence lengths by changing the `-m` parameter to larger models like `shakes256`, `shakes1024`, or `shakes2048`. You'll see the performance of NanoGPT token generation slow considerably with the bigger models.
 
+### My Compilation Hangs
+Some students have experienced issues when their compilation randomly starts hanging even though it was working before. When Python JIT compiles your code, it uses locks so multiple threads can compile it as once for efficiency. If you ever compiler your code and it hangs it means that for some reason Python thinks that the lock to your file is held. In order to fix this you can run:
+
+     rm ~/.cache/torch_extensions/py310_cpu/custom_module/lock
+
 ## An Attention Module
 
 The NanoGPT module you are executing in this assignment is a sequence-to-sequence model. The input is a sequence of words, such as the phrase *"The course of true love never did run smooth"*.  And the output of the model is a new sequence of words that is likely to follow the input, as determined by a model that have been trained on a large corpus of Shakespeare text. For example, given the prefix above, the output of the model might be *"whispered cs149 students whilst coding on assignments"*.  
