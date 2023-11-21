@@ -16,6 +16,7 @@
 
 // Step #1: Understand Read/Write Accessors for a 2D Tensor
 inline float twoDimRead(std::vector<float> &tensor, int &x, int &y, const int &sizeX) {
+    // Note that sizeX is the size of a Row, not the number of rows
     return tensor[x * (sizeX)+ y];
 }
 
