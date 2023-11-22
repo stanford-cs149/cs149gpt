@@ -250,7 +250,7 @@ You can see the DNN use your attention layer to generate text, optionally changi
 
     python3 gpt149.py part2 --inference -m shakes128
 
-Note that you will not be autograded on inference, and this is purely for fun.
+**Note:** You will not be autograded on inference as it is purely for fun, but it also is a good way to tell if your program was implemented correctly. If your implementation worked on the `python3 gpt149.py part2` test but does not work on the inference test `python3 gpt149.py part2 --inference -m shakes128`, then it means that your program was not implemented correctly such that it works for any tile size. The inference model works by looping over the sequence length ($N$), spitting out a new token each time. This means that when you run the model, $N$ is incrementing from $1...N$ . So for the `shakes128 model` it would increment from $1 -> 128$. For the non-inference tests we give you, the value of $N$ does not change. It is $1024$ each time.
 
 ### What to submit
 * Implement `myUnfusedAttentionBlocked` in `module.cpp`.
@@ -346,7 +346,7 @@ By doing this we can significantly decrease the memory footprint. Rather than ha
 
 ### Flash Attention Pseudocode
 
-The flash attention algorithm shown below, imports blocks of the matrices $Q$, $K$, and $V$ into smaller physical tiles. It then computes a local softmax in each tile, and then writes this result tile back to the full output matrix $O$. For $Q$, for example, each tile's size is (Br x d), and the tile size for $K$ is (Bc x d). Calculating $Br$ and $Bc$, as shown in the pseudocode below,  requires knowing the size $M$ of your SRAM/cache, which in this case is $M=131072$ floats. However, this number for $M$ is a suggestion - you are free to set $Br$ and $Bc$ to whatever values you find give you best performance. 
+The flash attention algorithm shown below, imports blocks of the matrices $Q$, $K$, and $V$ into smaller physical tiles. It then computes a local softmax in each tile, and then writes this result tile back to the full output matrix $O$. For $Q$, for example, each tile's size is (Br x d), and the tile size for $K$ is (Bc x d). Calculating $Br$ and $Bc$, as shown in the pseudocode below, requires knowing the size $M$ of your SRAM/cache, which in this case is $M=131072$ floats. For the purposes of this programming assignment, your program should be able to handle any $Br/Bc$ we give it.
 
 <p align="center">
   <img src="https://github.com/stanford-cs149/cs149gpt/blob/main/assets/FlashAttentionPseudo.png" width=65% height=65%>
@@ -357,18 +357,18 @@ Run the following test to check your program's correctness:
 
     python3 gpt149.py part4
 
-Feel free to change the $Br$ and $Bc$ parameters of the attention algorithm with the flags `-br <value>` and `-bc <value>`. The default values for each are $256$. For example, if I wanted to change $Br$ to $128$ and $Bc$ to $128$ I would run:
+**Make sure to test your implementation on different block sizes.** When running this test, the default values of $N$ and $d$ are $1024$ and $32$ respectively. Make sure that your program is able to handle any block size, whether your block size evenly divides into these values of $N/d$ or not. We have given you commandline flags to change the $Br$ and $Bc$ parameters of the attention algorithm. You can do this with the flags `-br <value>` and `-bc <value>`. The default values for each are $256$. For example, if I wanted to change $Br$ to $128$ and $Bc$ to $512$ I would run:
 
-    python3 gpt149.py part4 -br 128 -bc 128
+    python3 gpt149.py part4 -br 128 -bc 512
 
 A correct implementation should yield the following output:
 
     STUDENT - FLASH ATTENTION statistics
-    cpu time:  433.775ms
+    cpu time:  435.937ms
     mem usage:  524284 bytes
 
     REFERENCE - FLASH ATTENTION statistics
-    cpu time:  435.215ms
+    cpu time:  435.709ms
     mem usage:  524284 bytes
 
 An incorrect implementation will have the output:
@@ -383,7 +383,7 @@ Now, you can see the DNN use your attention layer to generate text, optionally c
 
     python3 gpt149.py part4 --inference -m shakes128
 
-Note that you will not be autograded on inference, and this is purely for fun.
+**Note:** You will not be autograded on inference as it is purely for fun, but it also is a good way to tell if your program was implemented correctly. If your implementation worked on the `python3 gpt149.py part4` test but does not work on the inference test `python3 gpt149.py part4 --inference -m shakes128`, then it means that your program was not implemented correctly such that it works for any block size. The inference model works by looping over the sequence length ($N$), spitting out a new token each time. This means that when you run the model, $N$ is incrementing from $1...N$ . So for the `shakes128 model` it would increment from $1 -> 128$. For the non-inference tests we give you, the value of $N$ does not change. It is $1024$ each time.
 
 ### What to submit
 * Implement `myFlashAttention` in `module.cpp`. 
