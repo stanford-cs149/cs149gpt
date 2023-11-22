@@ -364,11 +364,11 @@ Feel free to change the $Br$ and $Bc$ parameters of the attention algorithm with
 A correct implementation should yield the following output:
 
     STUDENT - FLASH ATTENTION statistics
-    cpu time:  462.853ms
+    cpu time:  433.775ms
     mem usage:  524284 bytes
 
     REFERENCE - FLASH ATTENTION statistics
-    cpu time:  462.85ms
+    cpu time:  435.215ms
     mem usage:  524284 bytes
 
 An incorrect implementation will have the output:
