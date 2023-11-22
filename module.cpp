@@ -102,8 +102,9 @@ torch::Tensor myNaiveAttention(torch::Tensor QTensor, torch::Tensor KTensor, tor
 
                      //loop over Embedding Dimensionality
                      for (int j = 0; j < d; j++) {
-		         float val = fourDimRead(Q, b, h, i, j, H, N, d);
-                         fourDimWrite(Q, b, h, i, j, H, N, d, 0.0);
+                        float val = fourDimRead(Q, b, h, i, j, H, N, d);
+                        val = 0.0;
+                        fourDimWrite(Q, b, h, i, j, H, N, d, val);
                      }
                  }
              }
@@ -115,7 +116,8 @@ torch::Tensor myNaiveAttention(torch::Tensor QTensor, torch::Tensor KTensor, tor
            for (int i = 0; i < N; i++) {
 	       for (int j = 0; j < N; j++) {
 	           float val = twoDimRead(QK_t, i, j, N);
-	           twoDimWrite(QK_t, i, j, N, 0.0);
+               val = 0.0;
+	           twoDimWrite(QK_t, i, j, N, val);
              }
          }
     */
