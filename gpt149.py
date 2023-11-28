@@ -11,7 +11,7 @@ import torch.nn as nn
 from torch.nn import functional as F
 from torch.utils.cpp_extension import load
 from torch.profiler import profile, record_function, ProfilerActivity
-import module_ref as mr
+import module_ref as ms
 
 NUM_THREADS=8
 torch.set_num_threads(NUM_THREADS)
@@ -20,7 +20,7 @@ ispc_path = getcwd() + "/module_ispc.o"
 if not path.exists(ispc_path): ispc_path = ""
 
 print("\nCompiling code into a PyTorch module...\n\n")
-ms = load(name="custom_module", sources=["module.cpp"],  extra_cflags=["-mavx", "-O3", "-fopenmp"], extra_ldflags=[ispc_path])
+mr = load(name="custom_module", sources=["module.cpp"],  extra_cflags=["-mavx", "-O3", "-fopenmp"], extra_ldflags=[ispc_path])
 correctness_error_message = "\n-------------------------------------------\n YOUR ATTENTION PRODUCED INCORRECT RESULTS"
 
 class CustomAttention(nn.Module):
@@ -40,11 +40,11 @@ class CustomAttention(nn.Module):
     #part 1
     def myUnfusedAttention(self):
         if self.isRef:
-            with record_function("REFERENCE - NAIVE ATTENTION"):
+            with record_function("STUDENT - NAIVE ATTENTION"):
                 temp = torch.zeros((self.N, self.N))
                 out = mr.myNaiveAttention(self.Q, self.K, self.V, temp, self.B, self.H, self.N, self.d)
             return out
-        with record_function("STUDENT - NAIVE ATTENTION"):
+        with record_function("REFERENCE - NAIVE ATTENTION"):
             temp = torch.zeros((self.N, self.N))
             out = ms.myNaiveAttention(self.Q, self.K, self.V, temp, self.B, self.H, self.N, self.d)
         return out
@@ -52,11 +52,11 @@ class CustomAttention(nn.Module):
     #part 2
     def myUnfusedAttentionBlocked(self):
         if self.isRef:
-            with record_function("REFERENCE - BLOCKED MATMUL + UNFUSED SOFTMAX"):
+            with record_function("STUDENT - BLOCKED MATMUL + UNFUSED SOFTMAX"):
                 temp = torch.zeros((self.N, self.N))
                 out = mr.myUnfusedAttentionBlocked(self.Q, self.K, self.V, temp, self.B, self.H, self.N, self.d)
             return out 
-        with record_function("STUDENT - BLOCKED MATMUL + UNFUSED SOFTMAX"):
+        with record_function("REFERENCE - BLOCKED MATMUL + UNFUSED SOFTMAX"):
             temp = torch.zeros((self.N, self.N))
             out = ms.myUnfusedAttentionBlocked(self.Q, self.K, self.V, temp, self.B, self.H, self.N, self.d)
         return out
@@ -64,11 +64,11 @@ class CustomAttention(nn.Module):
     #part 3
     def myFusedAttention(self):
         if self.isRef:
-            with record_function("REFERENCE - FUSED ATTENTION"):
+            with record_function("STUDENT - FUSED ATTENTION"):
                 temp = torch.zeros((NUM_THREADS, self.N))
                 out = mr.myFusedAttention(self.Q, self.K, self.V, temp, self.B, self.H, self.N, self.d)
             return out
-        with record_function("STUDENT - FUSED ATTENTION"):
+        with record_function("REFERENCE - FUSED ATTENTION"):
             temp = torch.zeros((NUM_THREADS, self.N))
             out = ms.myFusedAttention(self.Q, self.K, self.V, temp, self.B, self.H, self.N, self.d)
         return out
@@ -89,10 +89,10 @@ class CustomAttention(nn.Module):
         Li = torch.zeros((self.br))
 
         if self.isRef:
-            with record_function("REFERENCE - FLASH ATTENTION"):
+            with record_function("STUDENT - FLASH ATTENTION"):
                 out = mr.myFlashAttention(self.Q, self.K, self.V, Qi, Kj, Vj, Sij, Pij, PV, Oi, L, Li, Lij, Lnew, self.bc, self.br, self.B, self.H, self.N, self.d)
             return out
-        with record_function("STUDENT - FLASH ATTENTION"):
+        with record_function("REFERENCE - FLASH ATTENTION"):
             #out = ms.myFlashAttention(self.Q, self.K, self.V, self.B, self.H, self.N, self.d, self.blockSize)
             out = ms.myFlashAttention(self.Q, self.K, self.V, Qi, Kj, Vj, Sij, Pij, PV, Oi, L, Li, Lij, Lnew, self.bc, self.br, self.B, self.H, self.N, self.d)
         return out
@@ -202,11 +202,11 @@ def part1Test(N, d, B, H):
     attentionModuleStudent = CustomAttention(Q,K,V, B, H, N, d)
     attentionModuleReference = CustomAttention(Q,K,V, B, H, N, d, True)
     params = (N, d, B, H)
-    print("-----RUNNING STUDENT IMPLEMENTATION-----\n")
-    testTemplate(attentionModuleStudent.myUnfusedAttention, params, "STUDENT - NAIVE ATTENTION")
-    time.sleep(3)
     print("-----RUNNING REFERENCE IMPLEMENTATION-----\n")
-    testTemplate(attentionModuleReference.myUnfusedAttention, params, "REFERENCE - NAIVE ATTENTION")
+    testTemplate(attentionModuleStudent.myUnfusedAttention, params, "REFERENCE - NAIVE ATTENTION")
+    time.sleep(3)
+    print("-----RUNNING STUDENT IMPLEMENTATION-----\n")
+    testTemplate(attentionModuleReference.myUnfusedAttention, params, "STUDENT - NAIVE ATTENTION")
 
 def part2Test(N, d, B, H):
     print("Running Part 2 Test: Unfused Attention with Blocked Matmul\n")
@@ -214,11 +214,11 @@ def part2Test(N, d, B, H):
     attentionModuleStudent = CustomAttention(Q,K,V, B, H, N, d)
     attentionModuleReference = CustomAttention(Q,K,V, B, H, N, d, True)
     params = (N, d, B, H)
-    print("-----RUNNING STUDENT IMPLEMENTATION-----\n")
-    testTemplate(attentionModuleStudent.myUnfusedAttentionBlocked, params, "STUDENT - BLOCKED MATMUL + UNFUSED SOFTMAX")
-    time.sleep(3)
     print("-----RUNNING REFERENCE IMPLEMENTATION-----\n")
-    testTemplate(attentionModuleReference.myUnfusedAttentionBlocked, params, "REFERENCE - BLOCKED MATMUL + UNFUSED SOFTMAX")
+    testTemplate(attentionModuleStudent.myUnfusedAttentionBlocked, params, "REFERENCE - BLOCKED MATMUL + UNFUSED SOFTMAX")
+    time.sleep(3)
+    print("-----RUNNING STUDENT IMPLEMENTATION-----\n")
+    testTemplate(attentionModuleReference.myUnfusedAttentionBlocked, params, "STUDENT - BLOCKED MATMUL + UNFUSED SOFTMAX")
 
 def part3Test(N, d, B, H):
     print("Running Part 3 Test: Fused Attention\n")
@@ -226,11 +226,11 @@ def part3Test(N, d, B, H):
     attentionModuleStudent = CustomAttention(Q,K,V, B, H, N, d)
     attentionModuleReference = CustomAttention(Q,K,V, B, H, N, d, True)
     params = (N, d, B, H)
-    print("-----RUNNING STUDENT IMPLEMENTATION-----\n")
-    testTemplate(attentionModuleStudent.myFusedAttention, params, "STUDENT - FUSED ATTENTION")
-    time.sleep(3)
     print("-----RUNNING REFERENCE IMPLEMENTATION-----\n")
-    testTemplate(attentionModuleReference.myFusedAttention, params, "REFERENCE - FUSED ATTENTION")
+    testTemplate(attentionModuleStudent.myFusedAttention, params, "REFERENCE - FUSED ATTENTION")
+    time.sleep(3)
+    print("-----RUNNING STUDENT IMPLEMENTATION-----\n")
+    testTemplate(attentionModuleReference.myFusedAttention, params, "STUDENT - FUSED ATTENTION")
 
 def part4Test(N, d, B, H, bc, br):
     print("Running Part 4 Test: Flash Attention\n")
@@ -238,11 +238,11 @@ def part4Test(N, d, B, H, bc, br):
     attentionModuleStudent = CustomAttention(Q,K,V, B, H, N, d, False, bc, br)
     attentionModuleReference = CustomAttention(Q,K,V, B, H, N, d, True, bc, br)
     params = (N, d, B, H)
-    print("-----RUNNING STUDENT IMPLEMENTATION-----\n")
-    testTemplate(attentionModuleStudent.myFlashAttention, params, "STUDENT - FLASH ATTENTION")
-    time.sleep(3)
     print("-----RUNNING REFERENCE IMPLEMENTATION-----\n")
-    testTemplate(attentionModuleReference.myFlashAttention, params, "REFERENCE - FLASH ATTENTION")
+    testTemplate(attentionModuleStudent.myFlashAttention, params, "REFERENCE - FLASH ATTENTION")
+    time.sleep(3)
+    print("-----RUNNING STUDENT IMPLEMENTATION-----\n")
+    testTemplate(attentionModuleReference.myFlashAttention, params, "STUDENT - FLASH ATTENTION")
 
 def accessTest(B, H, N, d):
     Q,_ ,_ = createQKVSimple(N,d,B,H)
@@ -268,6 +268,7 @@ def main():
     parser.add_argument("--inference", action="store_true", default=False, help="run gpt inference")
     parser.add_argument("-bc",  default="256", help="Flash Attention Bc Size")
     parser.add_argument("-br", default="256", help="Flash Attention Br Size")
+    parser.add_argument("-N", default="1024", help="Flash Attention Br Size")
 
     args = parser.parse_args()
 
@@ -288,7 +289,7 @@ def main():
         return
     
     if args.inference == False:
-        N = 1024
+        N = int(args.N)
         if args.testname == "part0":
             part0Test(N, d, B, H)
         elif args.testname == "part1":
