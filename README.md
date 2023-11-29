@@ -352,7 +352,7 @@ It follows that if we have two BLOCKSIZE vectors, denoted as $x \in \mathbb{R}^{
 
 
 ### Implement Flash Attention
-Your job is to break softmax into blocks so it can be fused with your blocked matrix multiply. Therefore, for each block, you will multiply $Q$ (BLOCKROWSIZE x d) with $K^{t}$ (d x BLOCKCOLUMNSIZE) to get $QK^t$ (BLOCKROWSIZE x BLOCKCOLUMNSIZE). Then, you will calculate $softmax(QK^t)$ (BLOCKROWSIZE x 1) and multiply this with $V$ (BLOCKCOLUMNSIZE x d) to get $O$ (BLOCKROWSIZE x d). Remember, this is an accumulative process just like blocked matrix multiply!
+Your job is to break softmax into blocks so it can be fused with your blocked matrix multiply. Therefore, for each block, you will multiply $Q$ (BLOCKROWSIZE x d) with $K^{t}$ (d x BLOCKCOLUMNSIZE) to get $QK^t$ (BLOCKROWSIZE x BLOCKCOLUMNSIZE). Then, you will calculate $\texttt{softmax}(QK^t)$ (BLOCKROWSIZE x BLOCKCOLUMNSIZE) and multiply this with $V$ (BLOCKCOLUMNSIZE x d) to get $O$ (BLOCKROWSIZE x d). Remember, this is an accumulative process just like blocked matrix multiply!
 
 By doing this we can significantly decrease the memory footprint. Rather than having a memory footprint of $O(N^{2})$, we will be able to reduce this to a linear scaling footprint of $O(N)$.
 
