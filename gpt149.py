@@ -252,7 +252,7 @@ def accessTest(B, H, N, d):
     h = random.randrange(H)
     i = random.randrange(N)
     j = random.randrange(d)
-    print("\nIndexing Value When: b = " + str(b) + ", h = " + str(h) + ", i = " + str(i) + ", j = " + str(j))
+    print("\nIndexing Value When: x = " + str(b) + ", y = " + str(h) + ", z = " + str(i) + ", b = " + str(j))
     expected = round(Q[b][h][i][j].item(), 6)
     result = round(mr.fourDimRead(Q.flatten().tolist(), b, h, i, j, H, N, d), 6)
     print("Expected:", expected)
