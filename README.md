@@ -264,7 +264,7 @@ Note that you will not be autograded on inference, and this is purely for fun. P
 * Implement `myUnfusedAttentionBlocked` in `module.cpp`.
 
 * Then, answer the following questions in your writeup:
-  * What was the optimal tile size for your matrix multiplications? Explain why?
+  * Share us some data about what tile sizes you tried when N=1024, and what the performance times were for each.  What was the optimal tile size for your matrix multiplications? Explain why you think this cache size worked best for your implementation. There really isn't a wrong answer here, we just want to see that you experimented and tried to form conclusions.
   * For a matrix multiply of $Q$ (Nxd) and $K^{T}$ (dxN), what is the ratio of DRAM accesses in Part 2 versus DRAM acceses in Part 1? (assume 4 byte float primitives, 64 byte cache lines, as well as N and d are very large).
 
 ## Part 3: Fused Attention (25 Points)
